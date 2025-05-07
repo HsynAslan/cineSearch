@@ -5,6 +5,9 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const User = require("../models/User");
 const sendEmail = require("../utils/sendEmail");
+const authenticateToken = require("../middlewares/auth");
+const authMiddleware = require('../middlewares/auth'); // doğru path'e göre düzenle
+
 
 router.post("/register", async (req, res) => {
   try {
@@ -119,4 +122,26 @@ router.get("/verify/:token", async (req, res) => {
     }
   });
 
+
+  router.get("/profile", authMiddleware, async (req, res) => {
+    try {
+      const user = await User.findById(req.user.id); // middleware'de `req.user = decoded`
+  
+      if (!user) {
+        return res.status(404).json({ message: "Kullanıcı bulunamadı." });
+      }
+  
+      res.status(200).json({
+        name: user.name,
+        surname: user.surname,
+        email: user.email,
+        birthday: user.birthday,
+        gender: user.gender,
+        isVerified: user.isVerified,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Sunucu hatası." });
+    }
+  });
 module.exports = router;
