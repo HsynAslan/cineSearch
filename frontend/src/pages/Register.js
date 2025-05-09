@@ -94,9 +94,9 @@ function RegisterPage() {
               value={form.gender}
               onChange={handleChange}
             >
-              <option value="Kadın">Kadın</option>
-              <option value="Erkek">Erkek</option>
-              <option value="Diğer">Diğer</option>
+              <option value="male">Kadın</option>
+              <option value="female">Erkek</option>
+              <option value="other">Diğer</option>
             </select>
           </div>
           <button type="submit" className="btn-register">Kayıt Ol</button>
