@@ -92,6 +92,7 @@ router.get("/verify/:token", async (req, res) => {
   
   router.post("/login", async (req, res) => {
     try {
+      debugger;
       const { email, password } = req.body;
   
       // Kullanıcıyı e-posta ile bul
@@ -144,4 +145,29 @@ router.get("/verify/:token", async (req, res) => {
       res.status(500).json({ message: "Sunucu hatası." });
     }
   });
+
+
+// Backend tarafında `/home` endpoint'inde
+router.get("/home", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id); // Kullanıcı bilgilerini alıyoruz
+
+    if (!user) {
+      return res.status(404).json({ message: "Kullanıcı bulunamadı." });
+    }
+
+    // Kullanıcıya uygun filmleri burada döndürebiliriz
+    res.status(200).json({
+      message: "Home Page",
+      user: {
+        name: user.name,
+        favoriteMovies: user.favoriteMovies, // favori filmleri örnek
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Sunucu hatası." });
+  }
+});
+
 module.exports = router;
