@@ -12,7 +12,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 
 // TMDB API Routes
-app.use('/api', tmdbRoutes); // /api yolunu tmdbRoutes ile yönlendir
+app.use('/api/tmdb', tmdbRoutes);
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {

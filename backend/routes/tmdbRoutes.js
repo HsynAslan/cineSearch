@@ -73,5 +73,111 @@ router.get('/popular/movies', async (req, res) => {
     res.status(500).send('Error fetching popular movies');
   }
 });
+// Beğenilen Filmleri Al
+router.get('/account/favorite/movies', async (req, res) => {
+  const userId = req.user.id;  // Kullanıcı ID'sini almak için kimlik doğrulama yapın
+  try {
+    const response = await axios.get(`${apiUrl}/account/${userId}/favorite/movies`, {
+      params: { api_key: apiKey },
+    });
+    res.json(response.data.results);
+  } catch (error) {
+    console.error('Error fetching favorite movies:', error);
+    res.status(500).send('Error fetching favorite movies');
+  }
+});
+
+// Film Detayları Al
+router.get('/movie/details/:id', async (req, res) => {
+  const movieId = req.params.id;
+  try {
+    const response = await axios.get(`${apiUrl}/movie/${movieId}`, {
+      params: { api_key: apiKey },
+    });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error fetching movie details:', error);
+    res.status(500).send('Error fetching movie details');
+  }
+});
+// Favori Ekleme
+router.post('/movie/favorite', async (req, res) => {
+  const { movieId, userId } = req.body;
+  try {
+    const response = await axios.post(`${apiUrl}/account/${userId}/favorite`, {
+      media_type: 'movie',
+      media_id: movieId,
+      favorite: true,
+    }, {
+      params: { api_key: apiKey },
+    });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error adding to favorites:', error);
+    res.status(500).send('Error adding to favorites');
+  }
+});
+
+// İstek Listesine Ekleme (Wishlist)
+router.post('/movie/wishlist', async (req, res) => {
+  const { movieId, userId } = req.body;
+
+  if (!movieId || !userId) {
+    return res.status(400).send('MovieId ve userId gereklidir.');
+  }
+
+  try {
+    // Kullanıcı ID'sine ait veritabanına film ekleme işlemi
+    // Burada kullanıcı modeline uygun veritabanı işlemi yapılmalı (Örnek MongoDB)
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).send('Kullanıcı bulunamadı.');
+    }
+
+    // Eğer film zaten istek listesinde varsa, tekrar eklemeyelim
+    if (user.wishlist.includes(movieId)) {
+      return res.status(400).send('Film zaten istek listesine eklenmiş.');
+    }
+
+    user.wishlist.push(movieId); // Film ID'sini istek listesine ekle
+    await user.save(); // Değişiklikleri kaydet
+
+    res.status(200).send('Film istek listesine eklendi.');
+  } catch (error) {
+    console.error('İstek listesine eklerken hata:', error);
+    res.status(500).send('İstek listesine eklerken bir hata oluştu.');
+  }
+});
+// Beğenme (Like) Ekleme
+router.post('/movie/like', async (req, res) => {
+  const { movieId, userId } = req.body;
+
+  if (!movieId || !userId) {
+    return res.status(400).send('MovieId ve userId gereklidir.');
+  }
+
+  try {
+    // Kullanıcı ID'sine ait veritabanına film ekleme işlemi
+    // Burada kullanıcı modeline uygun veritabanı işlemi yapılmalı (Örnek MongoDB)
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).send('Kullanıcı bulunamadı.');
+    }
+
+    // Eğer film zaten beğenilmişse, tekrar beğenmesin
+    if (user.likes.includes(movieId)) {
+      return res.status(400).send('Film zaten beğenildi.');
+    }
+
+    user.likes.push(movieId); // Film ID'sini beğenilere ekle
+    await user.save(); // Değişiklikleri kaydet
+
+    res.status(200).send('Film beğenildi.');
+  } catch (error) {
+    console.error('Beğenme işlemi sırasında hata:', error);
+    res.status(500).send('Beğenme işlemi sırasında bir hata oluştu.');
+  }
+});
+
 
 module.exports = router;
