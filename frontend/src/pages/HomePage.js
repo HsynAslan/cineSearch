@@ -192,11 +192,11 @@ const handleSearch = async () => {
                   src={
                     movie.poster_path 
                       ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-                      : '/images/no-poster.jpg'
+                      : '../videos/no-poster.jpg'
                   } 
                   alt={movie.title} 
                   onError={(e) => {
-                    e.target.src = '/images/no-poster.jpg';
+                    e.target.src = '../videos/no-poster.jpg';
                   }}
                 />
                 <p>{movie.title}</p>
@@ -246,11 +246,11 @@ const handleSearch = async () => {
                         src={
                           movie.poster_path 
                             ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-                            : '/images/no-poster.jpg'
+                            : '../videos/no-poster.jpg'
                         } 
                         alt={movie.title}
                         onError={(e) => {
-                          e.target.src = '/images/no-poster.jpg';
+                          e.target.src = '../videos/no-poster.jpg';
                         }}
                       />
                       <p>{movie.title}</p>
@@ -277,11 +277,11 @@ const handleSearch = async () => {
                         src={
                           tv.poster_path 
                             ? `https://image.tmdb.org/t/p/w500${tv.poster_path}`
-                            : '/images/no-poster.jpg'
+                            : '../videos/no-poster.jpg'
                         } 
                         alt={tv.name}
                         onError={(e) => {
-                          e.target.src = '/images/no-poster.jpg';
+                          e.target.src = '../videos/no-poster.jpg';
                         }}
                       />
                       <p>{tv.name}</p>
