@@ -60,7 +60,7 @@ function Login() {
           <a href="/forgot-password">Şifremi Unuttum?</a>
         </div>
         <div className="signup-prompt">
-          <p>Hesabınız yok mu? <a href="/signup">Kayıt Ol</a></p>
+          <p>Hesabınız yok mu? <a href="/register">Kayıt Ol</a></p>
         </div>
       </div>
     </div>
