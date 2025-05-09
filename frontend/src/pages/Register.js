@@ -27,7 +27,7 @@ function RegisterPage() {
     setMessage("");
 
     try {
-      const response = await axios.post("${baseURL}/api/auth/register", form);
+      const response = await axios.post(`${baseURL}/api/auth/register`, form);
       setMessage("Kayıt başarılı! Lütfen e-posta adresinizi doğrulayın.");
       setTimeout(() => navigate("/login"), 3000);
     } catch (err) {

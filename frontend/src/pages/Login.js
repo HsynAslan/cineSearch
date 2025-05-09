@@ -14,7 +14,7 @@ function Login() {
     e.preventDefault();
     setIsLoading(true); // Loading başlatılıyor
     try {
-      const res = await axios.post('${baseURL}/api/auth/login', { email, password });
+      const res = await axios.post(`${baseURL}/api/auth/login`, { email, password });
       if (res.data.token) { // Token kontrolü yapıyoruz
         localStorage.setItem('token', res.data.token); // Token'ı localStorage'a kaydet
         navigate('/home'); // Başarıyla giriş yaptıktan sonra HomePage'e yönlendir

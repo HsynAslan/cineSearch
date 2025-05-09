@@ -32,7 +32,7 @@ const [noResults, setNoResults] = useState(null); // false değil, null
   useEffect(() => {
     const fetchPopularMovies = async () => {
       try {
-        const response = await axios.get('${baseURL}/api/tmdb/popular/movies');
+        const response = await axios.get(`${baseURL}/api/tmdb/popular/movies`);
         setPopularMovies(response.data);
       } catch (error) {
         console.error('Error fetching popular movies:', error);

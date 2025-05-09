@@ -16,7 +16,7 @@ function ProfilePage() {
           return;
         }
 
-        const response = await axios.get('${baseURL}/api/auth/profile', {
+        const response = await axios.get(`${baseURL}/api/auth/profile`, {
           headers: {
             Authorization: `Bearer ${token}`, // token ile kimlik doğrulama
           },

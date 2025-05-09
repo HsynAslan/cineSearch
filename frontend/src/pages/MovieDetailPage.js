@@ -16,21 +16,21 @@ function MovieDetailPage() {
 
   const handleFavorite = () => {
     const userId = localStorage.getItem('userId');
-    axios.post('${baseURL}/api/tmdb/movie/favorite', { movieId: id, userId })
+    axios.post(`${baseURL}/api/tmdb/movie/favorite`, { movieId: id, userId })
       .then(() => alert('Favorilere eklendi'))
       .catch(err => console.error('Favorilere ekleme hatası:', err));
   };
 
   const handleLike = () => {
     const userId = localStorage.getItem('userId');
-    axios.post('${baseURL}/api/tmdb/movie/like', { movieId: id, userId })
+    axios.post(`${baseURL}/api/tmdb/movie/like`, { movieId: id, userId })
       .then(() => alert('Beğenildi'))
       .catch(err => console.error('Beğenme hatası:', err));
   };
 
   const handleWishlist = () => {
     const userId = localStorage.getItem('userId');
-    axios.post('${baseURL}/api/tmdb/movie/wishlist', { movieId: id, userId })
+    axios.post(`${baseURL}/api/tmdb/movie/wishlist`, { movieId: id, userId })
       .then(() => alert('İstek listesine eklendi'))
       .catch(err => console.error('İstek listesi hatası:', err));
   };
