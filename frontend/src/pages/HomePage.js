@@ -13,6 +13,8 @@ function HomePage() {
   const carouselRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
+const [noResults, setNoResults] = useState(null); // false değil, null
+
 
 
 
@@ -92,37 +94,42 @@ function HomePage() {
     }, 1000);
   };
 
-  // Arama fonksiyonu
-  const handleSearch = async () => {
+const handleSearch = async () => {
   if (!searchQuery.trim()) {
     alert('Lütfen arama yapmak için bir şeyler yazın');
     return;
   }
-  
-  try {
-    const [movieResponse, tvResponse] = await Promise.all([
-      axios.get(`http://localhost:5000/api/tmdb/search/movies?query=${searchQuery}`),
-      axios.get(`http://localhost:5000/api/tmdb/search/tv?query=${searchQuery}`)
-    ]);
-    
-    setMovieResults(movieResponse.data);
-    setTvResults(tvResponse.data);
-console.log("Film sonuçları:", movieResponse.data);
-console.log("Dizi sonuçları:", tvResponse.data);
 
-    // Sonuçlara otomatik scroll
-    setTimeout(() => {
-      const resultsSection = document.querySelector('.results-section');
-      if (resultsSection) {
-        resultsSection.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 300);
-    
-  } catch (error) {
-    console.error('Error searching:', error);
-    alert('Arama sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+  let movies = [];
+  let tvs = [];
+
+  try {
+    const movieResponse = await axios.get(`http://localhost:5000/api/tmdb/search/movies?query=${searchQuery}`);
+    movies = movieResponse.data;
+  } catch (err) {
+    console.warn('Film arama başarısız:', err.message);
   }
+
+  try {
+    const tvResponse = await axios.get(`http://localhost:5000/api/tmdb/search/tv?query=${searchQuery}`);
+    tvs = tvResponse.data;
+  } catch (err) {
+    console.warn('Dizi arama başarısız:', err.message);
+  }
+
+  setMovieResults(movies);
+  setTvResults(tvs);
+  setNoResults(movies.length === 0 && tvs.length === 0);
+
+  setTimeout(() => {
+    const resultsSection = document.querySelector('.results-section');
+    if (resultsSection) {
+      resultsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, 300);
 };
+
+
 
   // Çıkış fonksiyonu
   const handleLogout = () => {
@@ -287,9 +294,11 @@ console.log("Dizi sonuçları:", tvResponse.data);
             )}
           </div>
         ) : (
-          <div className="no-results">
-            <p>Sonuç bulunamadı.</p>
-          </div>
+         noResults === true && (
+    <div className="results-section">
+      <p className="no-results-message">Aradığınız içerik bulunamadı.</p>
+    </div>
+  )
         )}
 
         {/* Çıkış butonu */}
