@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
+const baseURL = process.env.REACT_APP_API_BASE_URL;
 function ProfilePage() {
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
@@ -16,7 +16,7 @@ function ProfilePage() {
           return;
         }
 
-        const response = await axios.get('http://localhost:5000/api/auth/profile', {
+        const response = await axios.get('${baseURL}/api/auth/profile', {
           headers: {
             Authorization: `Bearer ${token}`, // token ile kimlik doğrulama
           },

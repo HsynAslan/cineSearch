@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import '../css/Register.css'; // CSS dosyasını buraya ekliyoruz
-
+const baseURL = process.env.REACT_APP_API_BASE_URL;
 function RegisterPage() {
   const [form, setForm] = useState({
     name: "",
@@ -27,7 +27,7 @@ function RegisterPage() {
     setMessage("");
 
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/register", form);
+      const response = await axios.post("${baseURL}/api/auth/register", form);
       setMessage("Kayıt başarılı! Lütfen e-posta adresinizi doğrulayın.");
       setTimeout(() => navigate("/login"), 3000);
     } catch (err) {

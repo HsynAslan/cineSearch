@@ -7,7 +7,7 @@ const User = require("../models/User");
 const sendEmail = require("../utils/sendEmail");
 const authenticateToken = require("../middlewares/auth");
 const authMiddleware = require('../middlewares/auth'); // doğru path'e göre düzenle
-
+const baseURL = process.env.REACT_APP_API_BASE_URL;
 
 router.post("/register", async (req, res) => {
   try {
@@ -31,7 +31,7 @@ router.post("/register", async (req, res) => {
 
     await newUser.save();
 
-    const verifyLink = `http://localhost:5000/api/auth/verify/${verificationToken}`;
+    const verifyLink = `${baseURL}/api/auth/verify/${verificationToken}`;
     const htmlMessage = `
     <div style="font-family:Arial,sans-serif; max-width:600px; margin:auto; padding:20px; border:1px solid #ddd; border-radius:10px;">
       <h2 style="color:#333;">Hoş Geldiniz, ${name}!</h2>

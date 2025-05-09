@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../css/HomePage.css';
-
+const baseURL = process.env.REACT_APP_API_BASE_URL;
 function HomePage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -32,7 +32,7 @@ const [noResults, setNoResults] = useState(null); // false değil, null
   useEffect(() => {
     const fetchPopularMovies = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/tmdb/popular/movies');
+        const response = await axios.get('${baseURL}/api/tmdb/popular/movies');
         setPopularMovies(response.data);
       } catch (error) {
         console.error('Error fetching popular movies:', error);
@@ -104,14 +104,14 @@ const handleSearch = async () => {
   let tvs = [];
 
   try {
-    const movieResponse = await axios.get(`http://localhost:5000/api/tmdb/search/movies?query=${searchQuery}`);
+    const movieResponse = await axios.get(`${baseURL}/api/tmdb/search/movies?query=${searchQuery}`);
     movies = movieResponse.data;
   } catch (err) {
     console.warn('Film arama başarısız:', err.message);
   }
 
   try {
-    const tvResponse = await axios.get(`http://localhost:5000/api/tmdb/search/tv?query=${searchQuery}`);
+    const tvResponse = await axios.get(`${baseURL}/api/tmdb/search/tv?query=${searchQuery}`);
     tvs = tvResponse.data;
   } catch (err) {
     console.warn('Dizi arama başarısız:', err.message);
