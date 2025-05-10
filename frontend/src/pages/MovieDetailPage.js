@@ -2,37 +2,31 @@ import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../css/MovieDetailPage.css';
+
 const baseURL = process.env.REACT_APP_API_BASE_URL;
+
 function MovieDetailPage() {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
+  const userId = localStorage.getItem('userId');
 
   useEffect(() => {
     axios.get(`${baseURL}/api/tmdb/movie/details/${id}`)
-
       .then(res => setMovie(res.data))
       .catch(err => console.error('Detay getirme hatası:', err));
   }, [id]);
 
-  const handleFavorite = () => {
-    const userId = localStorage.getItem('userId');
-    axios.post(`${baseURL}/api/tmdb/movie/favorite`, { movieId: id, userId })
-      .then(() => alert('Favorilere eklendi'))
-      .catch(err => console.error('Favorilere ekleme hatası:', err));
-  };
-
-  const handleLike = () => {
-    const userId = localStorage.getItem('userId');
-    axios.post(`${baseURL}/api/tmdb/movie/like`, { movieId: id, userId })
-      .then(() => alert('Beğenildi'))
-      .catch(err => console.error('Beğenme hatası:', err));
-  };
-
-  const handleWishlist = () => {
-    const userId = localStorage.getItem('userId');
-    axios.post(`${baseURL}/api/tmdb/movie/wishlist`, { movieId: id, userId })
-      .then(() => alert('İstek listesine eklendi'))
-      .catch(err => console.error('İstek listesi hatası:', err));
+  const sendAction = async (actionType, successMessage) => {
+    try {
+      const response = await axios.post(`${baseURL}/api/tmdb/movie/${actionType}`, {
+        movieId: id,
+        userId,
+      });
+      alert(successMessage);
+    } catch (error) {
+      console.error(`${actionType} hatası:`, error.response?.data || error.message);
+      alert(`Hata: ${error.response?.data || 'Bir sorun oluştu.'}`);
+    }
   };
 
   if (!movie) return <div className="loading">Yükleniyor...</div>;
@@ -48,9 +42,9 @@ function MovieDetailPage() {
         <p><strong>IMDB:</strong> {movie.vote_average}</p>
 
         <div className="detail-buttons">
-          <button onClick={handleFavorite}>❤️ Favori</button>
-          <button onClick={handleLike}>👍 Beğen</button>
-          <button onClick={handleWishlist}>⭐ İstek Listesi</button>
+          <button onClick={() => sendAction('favorite', 'Favorilere eklendi')}>❤️ Favori</button>
+          <button onClick={() => sendAction('like', 'Beğenildi')}>👍 Beğen</button>
+          <button onClick={() => sendAction('wishlist', 'İstek listesine eklendi')}>⭐ İstek Listesi</button>
         </div>
       </div>
     </div>
