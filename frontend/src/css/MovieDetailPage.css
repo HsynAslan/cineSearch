@@ -16,10 +16,25 @@
 
 .detail-info {
   max-width: 700px;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .detail-info h1 {
   font-size: 2.5rem;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.tagline {
+  font-size: 1.2rem;
+  font-style: italic;
+  margin-bottom: 15px;
+}
+
+.overview {
+  font-size: 1rem;
   margin-bottom: 20px;
 }
 
@@ -32,8 +47,43 @@
   border-radius: 5px;
   cursor: pointer;
   transition: 0.3s;
+  font-size: 1rem;
+  margin-top: 20px;
 }
 
 .detail-buttons button:hover {
   background-color: #f40612;
+}
+
+.similar-movies {
+  margin-top: 40px;
+  width: 100%;
+}
+
+.similar-movies h3 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+}
+
+.movies-list {
+  display: flex;
+  overflow-x: scroll;
+  gap: 20px;
+}
+
+.movie-item {
+  width: 200px;
+  text-align: center;
+}
+
+.movie-item img {
+  width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.movie-item p {
+  font-size: 1rem;
+  color: #fff;
+  margin-top: 10px;
 }

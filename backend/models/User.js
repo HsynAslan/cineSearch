@@ -9,6 +9,9 @@ const userSchema = new mongoose.Schema({
   gender: { type: String },
   isVerified: { type: Boolean, default: false },
   verificationToken: { type: String },
+  wishlist: [{ type: String }],
+likes: [{ type: String }],
+favorites: [{ type: String }],
 }, { timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);

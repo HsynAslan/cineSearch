@@ -249,4 +249,42 @@ router.delete("/wishlist/:movieId", auth, async (req, res) => {
   res.json({ message: "İstek listesinden kaldırıldı." });
 });
 
+// Film Fragmanlarını Getir
+router.get('/movie/:id/videos', async (req, res) => {
+  const movieId = req.params.id;
+  try {
+    const response = await axios.get(`${apiUrl}/movie/${movieId}/videos`, {
+      params: { api_key: apiKey },
+    });
+    res.json(response.data.results); // içinde YouTube videoları olacak
+  } catch (error) {
+    console.error('Error fetching movie videos:', error);
+    res.status(500).send('Video bilgileri alınamadı.');
+  }
+});
+
+// Film Detayları ve Fragman Bilgisi (tek bir response)
+router.get('/movie/:id', async (req, res) => {
+  const movieId = req.params.id;
+  try {
+    const detailsResponse = await axios.get(`${apiUrl}/movie/${movieId}`, {
+      params: { api_key: apiKey, language: 'tr-TR' },
+    });
+
+    const videoResponse = await axios.get(`${apiUrl}/movie/${movieId}/videos`, {
+      params: { api_key: apiKey, language: 'en-US' },
+    });
+
+    const trailer = videoResponse.data.results.find(
+      (video) => video.type === 'Trailer' && video.site === 'YouTube'
+    );
+
+    res.json({ movieDetails: detailsResponse.data, trailer });
+  } catch (error) {
+    console.error('Film detayları alınamadı:', error);
+    res.status(500).json({ message: 'Film detayları getirilemedi.' });
+  }
+});
+
+
 module.exports = router;

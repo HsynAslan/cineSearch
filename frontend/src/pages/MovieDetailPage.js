@@ -1,54 +1,61 @@
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
 import axios from 'axios';
-import '../css/MovieDetailPage.css';
 
-const baseURL = process.env.REACT_APP_API_BASE_URL;
-
-function MovieDetailPage() {
+const MovieDetailPage = () => {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
-  const userId = localStorage.getItem('userId');
+  const [trailer, setTrailer] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get(`${baseURL}/api/tmdb/movie/details/${id}`)
-      .then(res => setMovie(res.data))
-      .catch(err => console.error('Detay getirme hatası:', err));
+    const fetchMovieDetails = async () => {
+      try {
+        // TMDB API key'i backend'e proxy'lenmiş olduğunu varsayıyoruz
+        const response = await axios.get(`http://localhost:5000/api/tmdb/movie/${id}`);
+        setMovie(response.data.movieDetails);
+        setTrailer(response.data.trailer);
+        setLoading(false);
+      } catch (error) {
+        console.error('Film detayları alınamadı:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchMovieDetails();
   }, [id]);
 
-  const sendAction = async (actionType, successMessage) => {
-    try {
-      const response = await axios.post(`${baseURL}/api/tmdb/movie/${actionType}`, {
-        movieId: id,
-        userId,
-      });
-      alert(successMessage);
-    } catch (error) {
-      console.error(`${actionType} hatası:`, error.response?.data || error.message);
-      alert(`Hata: ${error.response?.data || 'Bir sorun oluştu.'}`);
-    }
-  };
-
-  if (!movie) return <div className="loading">Yükleniyor...</div>;
+  if (loading) return <p>Yükleniyor...</p>;
+  if (!movie) return <p>Film bulunamadı.</p>;
 
   return (
-    <div className="detail-container">
-      <div className="detail-poster">
-        <img src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} alt={movie.title || movie.name} />
-      </div>
-      <div className="detail-info">
-        <h1>{movie.title || movie.name}</h1>
-        <p><strong>Özet:</strong> {movie.overview}</p>
-        <p><strong>IMDB:</strong> {movie.vote_average}</p>
+    <div style={{ padding: '2rem' }}>
+      <h1>{movie.title}</h1>
+      <p>{movie.overview}</p>
+      <p><strong>Çıkış Tarihi:</strong> {movie.release_date}</p>
+      <img
+        src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+        alt={movie.title}
+        style={{ width: '300px', borderRadius: '10px' }}
+      />
 
-        <div className="detail-buttons">
-          <button onClick={() => sendAction('favorite', 'Favorilere eklendi')}>❤️ Favori</button>
-          <button onClick={() => sendAction('like', 'Beğenildi')}>👍 Beğen</button>
-          <button onClick={() => sendAction('wishlist', 'İstek listesine eklendi')}>⭐ İstek Listesi</button>
+      {trailer ? (
+        <div style={{ marginTop: '2rem' }}>
+          <h2>Fragman</h2>
+          <iframe
+            width="560"
+            height="315"
+            src={`https://www.youtube.com/embed/${trailer.key}`}
+            title="YouTube video player"
+            frameBorder="0"
+            allowFullScreen
+          />
         </div>
-      </div>
+      ) : (
+        <p>Fragman bulunamadı.</p>
+      )}
     </div>
   );
-}
+};
 
 export default MovieDetailPage;
