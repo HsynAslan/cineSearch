@@ -266,25 +266,25 @@ router.get('/movie/:id/videos', async (req, res) => {
 // Film Detayları ve Fragman Bilgisi (tek bir response)
 router.get('/movie/:id', async (req, res) => {
   const movieId = req.params.id;
+  if (!movieId) {
+    return res.status(400).json({ error: 'Film ID eksik.' });
+  }
+
   try {
-    const detailsResponse = await axios.get(`${apiUrl}/movie/${movieId}`, {
-      params: { api_key: apiKey, language: 'tr-TR' },
+    const response = await axios.get(`${apiUrl}/movie/${movieId}`, {
+      params: {
+        api_key: apiKey,
+        language: 'tr-TR'
+      }
     });
 
-    const videoResponse = await axios.get(`${apiUrl}/movie/${movieId}/videos`, {
-      params: { api_key: apiKey, language: 'en-US' },
-    });
-
-    const trailer = videoResponse.data.results.find(
-      (video) => video.type === 'Trailer' && video.site === 'YouTube'
-    );
-
-    res.json({ movieDetails: detailsResponse.data, trailer });
+    res.json(response.data);  // Dönen veriyi doğrudan frontend'e gönder
   } catch (error) {
-    console.error('Film detayları alınamadı:', error);
-    res.status(500).json({ message: 'Film detayları getirilemedi.' });
+    console.error('API Hatası:', error);
+    res.status(500).json({ error: 'Film detayları alınamadı.' });
   }
 });
+
 
 
 module.exports = router;
