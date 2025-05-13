@@ -103,9 +103,14 @@ const toggleFavoriteStatus = async () => {
     const payload = { type: "movie" };
 
     if (isFavorite) {
-      await axios.delete(url, { headers, data: payload });
-      setIsFavorite(false);
-      console.log("Favoriden çıkarıldı.");
+      // await axios.delete(url, { headers, data: payload });
+      // setIsFavorite(false);
+      // console.log("Favoriden çıkarıldı.");
+      await axios.delete(`${API_BASE_URL}/favorites/${id}`, {
+  headers: { Authorization: `Bearer ${token}` },
+  params: { type: 'movie' },
+  });
+  setIsFavorite(false);
     } else {
 
       await axios.post(url, payload, { headers });
