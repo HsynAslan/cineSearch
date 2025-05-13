@@ -11,8 +11,8 @@ const TvDetailPage = () => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [isInWishlist, setIsInWishlist] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(null);
+  const [isInWishlist, setIsInWishlist] = useState(null);
   const mediaType = 'tv'; // Fixed as 'tv' for this page
 
   // Get token from localStorage
@@ -40,34 +40,36 @@ const TvDetailPage = () => {
   }, [id]);
 
   // Check if TV show is in user's lists
-  useEffect(() => {
-    if (token) {
-      checkUserLists();
-    }
-  }, [token, id]);
+useEffect(() => {
+  if (token && tvShow) {
+    checkUserLists();
+  }
+}, [token, id, tvShow]);
 
-  const checkUserLists = async () => {
-    if (!token) {
-      console.error("Token bulunamadı.");
-      return;
-    }
 
-    try {
-      const response = await axios.get(`${API_BASE_URL}/check-lists/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        params: {
-          type: 'tv' // Specify we're checking for a TV show
-        }
-      });
+ const checkUserLists = async () => {
+  if (!token || !tvShow?.id) {
+    console.error("Gerekli veri yok.");
+    return;
+  }
 
-      setIsFavorite(response.data.isFavorite);
-      setIsInWishlist(response.data.isInWishlist);
-    } catch (err) {
-      console.error("API isteği sırasında hata oluştu:", err);
-    }
-  };
+  try {
+    const response = await axios.get(`${API_BASE_URL}/check-lists/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        type: 'tv'
+      }
+    });
+
+    setIsFavorite(response.data.isFavorite);
+    setIsInWishlist(response.data.isInWishlist);
+  } catch (err) {
+    console.error("API isteği sırasında hata oluştu:", err);
+  }
+};
+
 
   const toggleFavorite = async () => {
     if (!token) {
@@ -78,9 +80,9 @@ const TvDetailPage = () => {
     try {
       if (isFavorite) {
         await axios.delete(`${API_BASE_URL}/favorites/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-          data: { type: 'tv' },
-        });
+  headers: { Authorization: `Bearer ${token}` },
+  params: { type: 'tv' },
+});
         setIsFavorite(false);
       } else {
         await axios.post(
@@ -187,12 +189,16 @@ const TvDetailPage = () => {
           </div>
           
           <div className="movie-actions">
-            <button
-              onClick={toggleFavorite}
-              className={isFavorite ? 'active' : ''}
-            >
-              {isFavorite ? 'Favoriden Çıkar' : 'Favoriye Ekle'}
-            </button>
+          {isFavorite !== null && (
+  <button
+    onClick={toggleFavorite}
+    className={isFavorite ? 'active' : ''}
+  >
+    {isFavorite ? 'Favoriden Çıkar' : 'Favoriye Ekle'}
+  </button>
+)}
+
+
 
             <button 
               onClick={toggleWishlist} 

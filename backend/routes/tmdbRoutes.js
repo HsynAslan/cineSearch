@@ -187,19 +187,7 @@ router.post('/movie/like', async (req, res) => {
   }
 });
 
-// GET /api/user/check-lists/:movieId
-router.get("/check-lists/:movieId", auth, async (req, res) => {
-  const movieId = req.params.movieId;
-  const user = req.user;
 
-  const isFavorite = user.favorites.includes(movieId);
-  const isInWishlist = user.wishlist.includes(movieId);
-
-  res.json({
-    favorite: isFavorite,
-    wishlist: isInWishlist,
-  });
-});
 
 // ✅ Favori Ekle
 router.post("/favorites/:id", auth, async (req, res) => {
@@ -263,32 +251,34 @@ router.delete("/wishlist/:id", auth, async (req, res) => {
   res.json({ message: "İstek listesinden kaldırıldı." });
 });
 
-router.get("/check-lists/:id",  async (req, res) => {
- 
+
+// Sadece "movie" türünü kontrol eden liste kontrol endpoint'i
+router.get("/check-lists/movie/:id", auth, async (req, res) => {
   const { id } = req.params;
-  const user = req.user;
+  const user = req.user; // JWT doğrulama middleware ile geliyor olmalı
 
   try {
-     console.log("*****************************");
-    console.log("Kullanıcı verisi:", user); // Kullanıcı bilgilerini konsola yazdıralım
+    console.log("=== MOVIE CHECK ===");
+    
+    console.log("Kullanıcı ID:", user.id);
 
-    const isFavorite = user.favorites.some(item => item.id === id && item.type === 'movie');
-    const isInWishlist = user.wishlist.some(item => item.id === id && item.type === 'movie');
+    const isFavorite = user.favorites?.some(item => item.id === id && item.type === 'movie');
+    const isInWishlist = user.wishlist?.some(item => item.id === id && item.type === 'movie');
 
-    console.log("Favori kontrolü:", isFavorite); // Favori kontrolünü yazdıralım
-    console.log("İstek listesi kontrolü:", isInWishlist); // İstek listesi kontrolünü yazdıralım
+    console.log("Favori mi?", isFavorite);
+    console.log("İstek listesinde mi?", isInWishlist);
 
-    res.json({
-      favorites: user.favorites,
-      wishlist: user.wishlist,
-      isFavorite,
-      isInWishlist,
+    return res.json({
+      isFavorite: !!isFavorite,
+      isInWishlist: !!isInWishlist
     });
   } catch (err) {
-    console.error("API error:", err); // Hata mesajını da yazdıralım
-    res.status(500).json({ message: 'Bir hata oluştu.' });
+    console.error("Liste kontrol hatası:", err);
+    return res.status(500).json({ message: 'Bir hata oluştu.' });
   }
 });
+
+
 // Test Route
 router.get("/test", auth, async (req, res) => {
   console.log("Kullanıcı verisi:", req.user); // Kullanıcı bilgilerini kontrol ediyoruz

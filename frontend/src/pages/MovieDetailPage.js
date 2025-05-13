@@ -41,8 +41,11 @@ const MovieDetailPage = () => {
 
   // movie ve token varsa kullanıcı listesini kontrol et
 useEffect(() => {
+  console.log("açık mı kapalı mı kontrol edilecek");
   checkUserLists();  // Sayfa yüklendiğinde favori durumu kontrol edilir
-}, []);
+  console.log("açık mı kapalı mı kontrol etti");
+}, [id, token]);
+
 
 
 const checkUserLists = async () => {
@@ -54,13 +57,15 @@ const checkUserLists = async () => {
   console.log("Token gönderiliyor:", token); // Token'ı kontrol et
 
   try {
-    const response = await axios.get(`${API_BASE_URL}/check-lists/${id}`, {
+    const response = await axios.get(`${API_BASE_URL}/check-lists/movie/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
 
     console.log("API cevabı:", response.data);
+    setIsFavorite(response.data.isFavorite);
+    setIsInWishlist(response.data.isInWishlist);
   } catch (err) {
     console.error("API isteği sırasında hata oluştu:", err);
   }
@@ -82,66 +87,57 @@ const testToken = async () => {
 
 
 
-const toggleFavorite = async () => {
+const toggleFavoriteStatus = async () => {
   if (!token) {
-    console.error("Kullanıcı oturum açmamış.");
+    console.error("Kullanıcı giriş yapmamış.");
     return;
   }
 
-  console.log("Favori durumu şu an:", isFavorite ? 'Tıklanmış' : 'Tıklanmamış');
-
   try {
+    const url = `${API_BASE_URL}/favorites/${id}`;
+    const headers = { Authorization: `Bearer ${token}` };
+    const payload = { type: "movie" };
+
     if (isFavorite) {
-      // Favoriden kaldır
-      await axios.delete(`${API_BASE_URL}/favorites/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-        data: { type: 'movie' }, // Film türü gönderiyoruz
-      });
-      setIsFavorite(false); // Favori durumunu false yap
-      console.log("Favori kaldırıldı.");
+      await axios.delete(url, { headers, data: payload });
+      setIsFavorite(false);
+      console.log("Favoriden çıkarıldı.");
     } else {
-      // Favoriye ekle
-      await axios.post(`${API_BASE_URL}/favorites/${id}`, 
-        { type: 'movie' }, 
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
-      setIsFavorite(true); // Favori durumunu true yap
+      await axios.post(url, payload, { headers });
+      setIsFavorite(true);
       console.log("Favoriye eklendi.");
     }
   } catch (err) {
-    console.error("Favori güncellenirken hata oluştu:", err);
+    console.error("Favori güncelleme hatası:", err.response?.data?.message || err.message);
   }
 };
 
 
-  const toggleWishlist = async () => {
-    if (!token) {
-      console.error("Kullanıcı oturum açmamış. Token bulunamadı.");
-      return;
-    }
+const toggleWishlistStatus = async () => {
+  if (!token) {
+    console.error("Kullanıcı giriş yapmamış.");
+    return;
+  }
 
-    try {
-      console.log(isInWishlist ? 'İstek listesi butonuna tıklanmadı' : 'İstek listesi butonuna tıklandı');
+  try {
+    const url = `${API_BASE_URL}/wishlist/${id}`;
+    const headers = { Authorization: `Bearer ${token}` };
+    const payload = { type: "tv" };
 
-      if (isInWishlist) {
-        await axios.delete(`${API_BASE_URL}/wishlist/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-          data: { type: mediaType },
-        });
-      } else {
-        await axios.post(
-          `${API_BASE_URL}/wishlist/${id}`,
-          { type: mediaType },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      }
-      setIsInWishlist(!isInWishlist);
-    } catch (err) {
-      console.error("İstek listesi durumu değiştirilemedi:", err);
+    if (isInWishlist) {
+      await axios.delete(url, { headers, data: payload });
+      setIsInWishlist(false);
+      console.log("İstek listesinden çıkarıldı.");
+    } else {
+      await axios.post(url, payload, { headers });
+      setIsInWishlist(true);
+      console.log("İstek listesine eklendi.");
     }
-  };
+  } catch (err) {
+    console.error("İstek listesi güncelleme hatası:", err.response?.data?.message || err.message);
+  }
+};
+
 
   // Render işleminden önce state güncellenmesini izlemek için
   useEffect(() => {
@@ -185,19 +181,14 @@ const toggleFavorite = async () => {
           </div>
           
           <div className="movie-actions">
-            <button
-  onClick={toggleFavorite}
-  className={isFavorite ? 'active' : ''}
->
-  {isFavorite ? 'Favoriden Çıkar' : 'Favoriye Ekle'}
+           <button onClick={toggleFavoriteStatus} className={isFavorite ? 'active' : ''}>
+  {isFavorite ? ` - Favoriden Çıkar ` : `+ Favoriye Ekle `}
 </button>
 
-            <button 
-              onClick={toggleWishlist} 
-              className={isInWishlist ? 'active' : ''}
-            >
-              {isInWishlist ? '✓ In Wishlist' : '+ Add to Wishlist'}
-            </button>
+
+          <button onClick={toggleWishlistStatus} className={isInWishlist ? 'active' : ''}>
+  {isInWishlist ? '✓ In Wishlist' : '+ Add to Wishlist'}
+</button>
           </div>
           
           <h2>Overview</h2>
