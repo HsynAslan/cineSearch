@@ -190,7 +190,7 @@ router.post('/movie/like', async (req, res) => {
 
 
 const updateMovieSuggestions = require("../utils/updateMovieSuggestions"); // üstte tanımlı olmalı
-
+const updateTvSuggestions = require("../utils/updateTvSuggestions");
 // ✅ Favori Ekle
 router.post("/favorites/:id", auth, async (req, res) => {
   const { id } = req.params;
@@ -209,14 +209,15 @@ router.post("/favorites/:id", auth, async (req, res) => {
   user.favorites.push({ id, type });
   await user.save();
 
-  // 🎯 Sadece filmse önerileri güncelle
-  if (type === "movie") {
-    try {
+  try {
+    if (type === "movie") {
       await updateMovieSuggestions(user._id.toString(), id);
-    } catch (err) {
-      console.error("Öneriler güncellenirken hata:", err.message);
-      // isteğe bağlı: hata olsa da favori kaydedildiği için 200 dönebiliriz
+    } else if (type === "tv") {
+      await updateTvSuggestions(user._id.toString(), id);
     }
+  } catch (err) {
+    console.error("Öneriler güncellenirken hata:", err.message);
+    // hata olsa da favori kaydedildiği için 200 dönebilir
   }
 
   res.json({ message: "Favorilere eklendi." });
@@ -467,15 +468,14 @@ router.get('/suggestions', auth, async (req, res) => {
       return res.json([]);
     }
 
-    // Son 15 öneriyi ters sırayla al
+    // En son 15 öneriyi al (son eklenenler)
     const latestSuggestions = user.movieSuggestions
-      .slice(-15)
-      .reverse();
+      .slice(0, 15); // İlk 15 öneriyi al
 
     const movieIds = latestSuggestions.map((item) => item.id);
 
     const moviePromises = movieIds.map((id) =>
-      axios.get(`https://api.themoviedb.org/3/movie/${id}?api_key=${apiKey}&language=tr-TR`)
+      axios.get(`https://api.themoviedb.org/3/movie/${id}?api_key=${process.env.TMDB_API_KEY}&language=tr-TR`)
     );
     const movieResponses = await Promise.all(moviePromises);
     const suggestedMovies = movieResponses.map((response) => response.data);
@@ -487,6 +487,55 @@ router.get('/suggestions', auth, async (req, res) => {
   }
 });
 
+
+// routes/tmdb.js
+router.get('/suggestions/tv', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    const likedTvIds = user.likes.filter(item => item.type === 'tv').map(item => item.id);
+
+    // Basitçe ilk 3 beğenilen TV show üzerinden öneri üret
+    const results = await Promise.all(
+      likedTvIds.slice(0, 3).map(async (id) => {
+        const response = await axios.get(`https://api.themoviedb.org/3/tv/${id}/recommendations?api_key=${process.env.TMDB_API_KEY}&language=tr-TR`);
+        return response.data.results || [];
+      })
+    );
+
+    const suggestions = results.flat().slice(0, 10); // İlk 10 öneri
+    res.json(suggestions);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Öneriler alınamadı' });
+  }
+});
+
+router.get('/suggestionsTvGet', auth, async (req, res) => {
+  try {
+    const user = req.user;
+
+    if (!user || !user.tvSuggestions || user.tvSuggestions.length === 0) {
+      return res.json([]);
+    }
+
+    // En son 15 öneriyi al (son eklenenler)
+    const latestSuggestions = user.tvSuggestions
+      .slice(0, 15); // İlk 15 öneriyi al
+
+    const tvIds = latestSuggestions.map((item) => item.id);
+
+    const tvPromises = tvIds.map((id) =>
+      axios.get(`https://api.themoviedb.org/3/tv/${id}?api_key=${process.env.TMDB_API_KEY}&language=tr-TR`)
+    );
+    const tvResponses = await Promise.all(tvPromises);
+    const suggestedTvShows = tvResponses.map((response) => response.data);
+
+    res.json(suggestedTvShows);
+  } catch (error) {
+    console.error('Error fetching suggested TV shows:', error.message);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
 
 
 

@@ -15,12 +15,15 @@ function HomePage() {
   const [isScrolling, setIsScrolling] = useState(false);
 const [noResults, setNoResults] = useState(null); // false değil, null
 const [suggestedMovies, setSuggestedMovies] = useState([]);
-const [loadingSuggestions, setLoadingSuggestions] = useState(true);
 const [suggestionsLoading, setSuggestionsLoading] = useState(true);
 const [suggestionsError, setSuggestionsError] = useState(false);
 const suggestionRef = useRef(null);
 
 
+const [suggestedTVShows, setSuggestedTVShows] = useState([]);
+const [tvSuggestionsLoading, setTvSuggestionsLoading] = useState(true);
+const [tvSuggestionsError, setTvSuggestionsError] = useState(false);
+const tvSuggestionRef = useRef(null);
 
 
   // Kullanıcı oturum kontrolü
@@ -191,6 +194,36 @@ useEffect(() => {
   }
 };
 
+useEffect(() => {
+  const fetchTvSuggestions = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${baseURL}/api/tmdb/suggestionsTvGet`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setSuggestedTVShows(response.data || []);
+    } catch (error) {
+      console.error('Önerilen diziler alınamadı:', error);
+      setTvSuggestionsError(true);
+    } finally {
+      setTvSuggestionsLoading(false);
+    }
+  };
+
+  fetchTvSuggestions();
+}, []);
+
+const scrollTvSuggestions = (direction) => {
+  if (tvSuggestionRef.current) {
+    const scrollAmount = direction === 'left' ? -300 : 300;
+    tvSuggestionRef.current.scrollBy({
+      left: scrollAmount,
+      behavior: 'smooth'
+    });
+  }
+};
+
 
  return (
   <div className="home-page">
@@ -289,6 +322,46 @@ useEffect(() => {
     <p className="no-suggestions">Lütfen beğendiğiniz filmleri favorileyin.</p>
   )}
 </div>
+
+
+<div className="suggestions-section">
+  <h3 className="section-title">Önerilen Diziler</h3>
+
+  {tvSuggestionsLoading ? (
+    <p>Yükleniyor...</p>
+  ) : suggestedTVShows.length > 0 ? (
+    <div className="suggestion-carousel-wrapper">
+      <button className="scroll-btn left" onClick={() => scrollTvSuggestions('left')}>&lt;</button>
+
+      <div className="suggestion-carousel" ref={tvSuggestionRef}>
+        {suggestedTVShows.map((tv) => (
+          <div
+            className="suggestion-item"
+            key={tv.id}
+            onClick={() => openMovieDetails(tv)}
+          >
+            <img
+              src={
+                tv.poster_path
+                  ? `https://image.tmdb.org/t/p/w500${tv.poster_path}`
+                  : '/videos/no-poster.jpg'
+              }
+              alt={tv.name || tv.title}
+              onError={(e) => (e.target.src = '/videos/no-poster.jpg')}
+            />
+            <p>{tv.name || tv.title}</p>
+          </div>
+        ))}
+      </div>
+
+      <button className="scroll-btn right" onClick={() => scrollTvSuggestions('right')}>&gt;</button>
+    </div>
+  ) : (
+    <p className="no-suggestions">Lütfen beğendiğiniz dizileri favorileyin.</p>
+  )}
+</div>
+
+
 
         {/* Arama bölümü */}
         <div className="search-container">
