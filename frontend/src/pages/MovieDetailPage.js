@@ -65,7 +65,10 @@ const checkUserLists = async () => {
 
     console.log("API cevabı:", response.data);
     setIsFavorite(response.data.isFavorite);
+    console.log("isFavorite durumu:", response.data.isFavorite);
     setIsInWishlist(response.data.isInWishlist);
+    console.log("isInWishlist durumu:", response.data.isInWishlist);
+
   } catch (err) {
     console.error("API isteği sırasında hata oluştu:", err);
   }

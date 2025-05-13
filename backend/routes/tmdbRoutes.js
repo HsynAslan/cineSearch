@@ -263,7 +263,33 @@ router.get("/check-lists/movie/:id", auth, async (req, res) => {
     console.log("Kullanıcı ID:", user.id);
 
     const isFavorite = user.favorites?.some(item => item.id === id && item.type === 'movie');
-    const isInWishlist = user.wishlist?.some(item => item.id === id && item.type === 'movie');
+    const isInWishlist = user.wishlist?.some(item => item.id === id && item.type === 'tv');
+
+    console.log("Favori mi?", isFavorite);
+    console.log("İstek listesinde mi?", isInWishlist);
+
+    return res.json({
+      isFavorite: !!isFavorite,
+      isInWishlist: !!isInWishlist
+    });
+  } catch (err) {
+    console.error("Liste kontrol hatası:", err);
+    return res.status(500).json({ message: 'Bir hata oluştu.' });
+  }
+});
+
+// Sadece "tv" türünü kontrol eden liste kontrol endpoint'i
+router.get("/check-lists/tv/:id", auth, async (req, res) => {
+  const { id } = req.params;
+  const user = req.user; // JWT doğrulama middleware ile geliyor olmalı
+
+  try {
+    console.log("=== TV SERIES CHECK ===");
+    
+    console.log("Kullanıcı ID:", user.id);
+
+    const isFavorite = user.favorites?.some(item => item.id === id && item.type === 'tv');
+    const isInWishlist = user.wishlist?.some(item => item.id === id && item.type === 'tv');
 
     console.log("Favori mi?", isFavorite);
     console.log("İstek listesinde mi?", isInWishlist);

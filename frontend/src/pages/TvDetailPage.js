@@ -47,22 +47,22 @@ useEffect(() => {
 }, [token, id, tvShow]);
 
 
- const checkUserLists = async () => {
-  if (!token || !tvShow?.id) {
-    console.error("Gerekli veri yok.");
+const checkUserLists = async () => {
+  if (!token) {
+    console.error("Token bulunamadı.");
     return;
   }
 
+  console.log("Token gönderiliyor:", token); // Token'ı kontrol et
+
   try {
-    const response = await axios.get(`${API_BASE_URL}/check-lists/${id}`, {
+    const response = await axios.get(`${API_BASE_URL}/check-lists/tv/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      params: {
-        type: 'tv'
-      }
     });
 
+    console.log("API cevabı:", response.data);
     setIsFavorite(response.data.isFavorite);
     setIsInWishlist(response.data.isInWishlist);
   } catch (err) {
