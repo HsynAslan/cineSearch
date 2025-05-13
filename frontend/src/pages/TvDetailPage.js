@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import '../css/MovieDetailPage.css'; // You can reuse the same CSS or create a TvDetailPage.css if needed
 
-const API_BASE_URL = 'http://localhost:5000/api/tmdb';
+const API_BASE_URL = 'https://cinesearch-backend-1h9k.onrender.com/api/tmdb';
 
 const TvDetailPage = () => {
   const { id } = useParams();

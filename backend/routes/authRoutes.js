@@ -78,7 +78,7 @@ router.get("/verify/:token", async (req, res) => {
           <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto;">
             <h1 style="color: #4CAF50;">✓ Doğrulama Başarılı</h1>
             <p style="font-size: 18px; color: #333;">Hesabınız başarıyla doğrulandı. Artık giriş yapabilirsiniz.</p>
-            <a href="http://localhost:3000/login" style="color: #4CAF50; font-size: 16px; text-decoration: none;">Giriş Yap</a>
+            <a href="https://cine-search-jade.vercel.app/login" style="color: #4CAF50; font-size: 16px; text-decoration: none;">Giriş Yap</a>
           </div>
         </body>
         </html>
