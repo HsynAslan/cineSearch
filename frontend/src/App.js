@@ -7,7 +7,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import Home from './pages/Home';
 import HomePage from "./pages/HomePage"; // HomePage component
 import MovieDetailPage from "./pages/MovieDetailPage"; // MovieDetailPage component
-
+import TvDetailPage from "./pages/TvDetailPage"; // MovieDetailPage component
 function App() {
   return (
     <Router>
@@ -18,6 +18,7 @@ function App() {
         <Route path="/profile" element={<ProfilePage />} />
          <Route path="/home" element={<HomePage />} />
          <Route path="/movie/:id" element={<MovieDetailPage />} />
+         <Route path="/tv/:id" element={<TvDetailPage />} />
         <Route path="*" element={<NotFoundPage />} /> {/* 404 yönlendirmesi */}
       </Routes>
     </Router>

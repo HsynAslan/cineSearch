@@ -202,52 +202,100 @@ router.get("/check-lists/:movieId", auth, async (req, res) => {
 });
 
 // ✅ Favori Ekle
-router.post("/favorites/:movieId", auth, async (req, res) => {
-  const movieId = req.params.movieId;
+router.post("/favorites/:id", auth, async (req, res) => {
+  const { id } = req.params;
+  const { type } = req.body;
   const user = req.user;
 
-  if (user.favorites.includes(movieId)) {
-    return res.status(400).json({ message: "Film zaten favorilere eklenmiş." });
+  if (!["movie", "tv"].includes(type)) {
+    return res.status(400).json({ message: "Geçersiz içerik türü." });
   }
 
-  user.favorites.push(movieId);
+  const exists = user.favorites.some(item => item.id === id && item.type === type);
+  if (exists) {
+    return res.status(400).json({ message: "Zaten favorilerde." });
+  }
+
+  user.favorites.push({ id, type });
   await user.save();
   res.json({ message: "Favorilere eklendi." });
 });
 
 // ❌ Favoriden Kaldır
-router.delete("/favorites/:movieId", auth, async (req, res) => {
-  const movieId = req.params.movieId;
+router.delete("/favorites/:id", auth, async (req, res) => {
+  const { id } = req.params;
+  const { type } = req.body;
   const user = req.user;
 
-  user.favorites = user.favorites.filter(id => id !== movieId);
+  user.favorites = user.favorites.filter(item => item.id !== id || item.type !== type);
   await user.save();
   res.json({ message: "Favorilerden kaldırıldı." });
 });
 
 // ✅ Wishlist Ekle
-router.post("/wishlist/:movieId", auth, async (req, res) => {
-  const movieId = req.params.movieId;
+router.post("/wishlist/:id", auth, async (req, res) => {
+  const { id } = req.params;
+  const { type } = req.body;
   const user = req.user;
 
-  if (user.wishlist.includes(movieId)) {
-    return res.status(400).json({ message: "Film zaten istek listesinde." });
+  if (!["movie", "tv"].includes(type)) {
+    return res.status(400).json({ message: "Geçersiz içerik türü." });
   }
 
-  user.wishlist.push(movieId);
+  const exists = user.wishlist.some(item => item.id === id && item.type === type);
+  if (exists) {
+    return res.status(400).json({ message: "Zaten istek listesinde." });
+  }
+
+  user.wishlist.push({ id, type });
   await user.save();
   res.json({ message: "İstek listesine eklendi." });
 });
 
 // ❌ Wishlist'ten Kaldır
-router.delete("/wishlist/:movieId", auth, async (req, res) => {
-  const movieId = req.params.movieId;
+router.delete("/wishlist/:id", auth, async (req, res) => {
+  const { id } = req.params;
+  const { type } = req.body;
   const user = req.user;
 
-  user.wishlist = user.wishlist.filter(id => id !== movieId);
+  user.wishlist = user.wishlist.filter(item => item.id !== id || item.type !== type);
   await user.save();
   res.json({ message: "İstek listesinden kaldırıldı." });
 });
+
+router.get("/check-lists/:id",  async (req, res) => {
+ 
+  const { id } = req.params;
+  const user = req.user;
+
+  try {
+     console.log("*****************************");
+    console.log("Kullanıcı verisi:", user); // Kullanıcı bilgilerini konsola yazdıralım
+
+    const isFavorite = user.favorites.some(item => item.id === id && item.type === 'movie');
+    const isInWishlist = user.wishlist.some(item => item.id === id && item.type === 'movie');
+
+    console.log("Favori kontrolü:", isFavorite); // Favori kontrolünü yazdıralım
+    console.log("İstek listesi kontrolü:", isInWishlist); // İstek listesi kontrolünü yazdıralım
+
+    res.json({
+      favorites: user.favorites,
+      wishlist: user.wishlist,
+      isFavorite,
+      isInWishlist,
+    });
+  } catch (err) {
+    console.error("API error:", err); // Hata mesajını da yazdıralım
+    res.status(500).json({ message: 'Bir hata oluştu.' });
+  }
+});
+// Test Route
+router.get("/test", auth, async (req, res) => {
+  console.log("Kullanıcı verisi:", req.user); // Kullanıcı bilgilerini kontrol ediyoruz
+  res.json({ message: "Token doğrulandı!" });
+});
+
+
 
 // Film Fragmanlarını Getir
 router.get('/movie/:id/videos', async (req, res) => {
@@ -260,6 +308,34 @@ router.get('/movie/:id/videos', async (req, res) => {
   } catch (error) {
     console.error('Error fetching movie videos:', error);
     res.status(500).send('Video bilgileri alınamadı.');
+  }
+});
+
+// TV Show Details
+router.get('/tv/:id', async (req, res) => {
+  const tvId = req.params.id;
+  try {
+    const response = await axios.get(`${apiUrl}/tv/${tvId}`, {
+      params: { api_key: apiKey }
+    });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error fetching TV show details:', error);
+    res.status(500).send('Error fetching TV show details');
+  }
+});
+
+// TV Show Videos
+router.get('/tv/:id/videos', async (req, res) => {
+  const tvId = req.params.id;
+  try {
+    const response = await axios.get(`${apiUrl}/tv/${tvId}/videos`, {
+      params: { api_key: apiKey }
+    });
+    res.json(response.data.results);
+  } catch (error) {
+    console.error('Error fetching TV show videos:', error);
+    res.status(500).send('Error fetching TV show videos');
   }
 });
 
