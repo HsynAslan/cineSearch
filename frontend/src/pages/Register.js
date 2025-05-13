@@ -49,7 +49,7 @@ function RegisterPage() {
           <input name="surname" placeholder="Soyadınız" value={form.surname} onChange={handleChange} required />
           <input type="email" name="email" placeholder="E-posta" value={form.email} onChange={handleChange} required />
           <input type="password" name="password" placeholder="Şifre" value={form.password} onChange={handleChange} required />
-          <input type="date" name="birthday" value={form.birthday} onChange={handleChange} />
+          <input type="date" name="birthday" value={form.birthday} onChange={handleChange} placeholder="Doğum Tarihi"/>
           <select name="gender" value={form.gender} onChange={handleChange}>
             <option value="">Cinsiyet Seçin</option>
             <option value="female">Kadın</option>
