@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import '../css/HomePage.css';
+import '../css/1HomePage.css';
 const baseURL = process.env.REACT_APP_API_BASE_URL;
 function HomePage() {
   const [loading, setLoading] = useState(true);
