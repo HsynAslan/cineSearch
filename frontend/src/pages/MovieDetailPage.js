@@ -103,25 +103,22 @@ const toggleFavoriteStatus = async () => {
     const payload = { type: "movie" };
 
     if (isFavorite) {
-      // await axios.delete(url, { headers, data: payload });
-      // setIsFavorite(false);
-      // console.log("Favoriden çıkarıldı.");
-      await axios.delete(`${API_BASE_URL}/favorites/${id}`, {
-  headers: { Authorization: `Bearer ${token}` },
-  params: { type: 'movie' },
-  });
-  setIsFavorite(false);
+      await axios.delete(url, {
+        headers,
+        data: payload, // 'params' yerine 'data' kullanıyoruz
+      });
+      setIsFavorite(false);
+      console.log("Favoriden çıkarıldı.");
     } else {
-
       await axios.post(url, payload, { headers });
       setIsFavorite(true);
       console.log("Favoriye eklendi.");
-    
     }
   } catch (err) {
     console.error("Favori güncelleme hatası:", err.response?.data?.message || err.message);
   }
 };
+
 
 
 const toggleWishlistStatus = async () => {

@@ -227,13 +227,18 @@ router.post("/favorites/:id", auth, async (req, res) => {
 // ❌ Favoriden Kaldır
 router.delete("/favorites/:id", auth, async (req, res) => {
   const { id } = req.params;
-  const { type } = req.body;
+  const { type } = req.body; // Burada type'ı body'den alıyoruz.
   const user = req.user;
+
+  if (!type) {
+    return res.status(400).json({ message: "Tür belirtilmelidir." });
+  }
 
   user.favorites = user.favorites.filter(item => item.id !== id || item.type !== type);
   await user.save();
   res.json({ message: "Favorilerden kaldırıldı." });
 });
+
 
 // ✅ Wishlist Ekle
 router.post("/wishlist/:id", auth, async (req, res) => {

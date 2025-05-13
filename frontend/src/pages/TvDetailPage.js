@@ -71,31 +71,32 @@ const checkUserLists = async () => {
 };
 
 
-  const toggleFavorite = async () => {
-    if (!token) {
-      console.error("Kullanıcı oturum açmamış.");
-      return;
-    }
+const toggleFavorite = async () => {
+  if (!token) {
+    console.error("Kullanıcı oturum açmamış.");
+    return;
+  }
 
-    try {
-      if (isFavorite) {
-        await axios.delete(`${API_BASE_URL}/favorites/${id}`, {
-  headers: { Authorization: `Bearer ${token}` },
-  params: { type: 'tv' },
-});
-        setIsFavorite(false);
-      } else {
-        await axios.post(
-          `${API_BASE_URL}/favorites/${id}`,
-          { type: 'tv' },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setIsFavorite(true);
-      }
-    } catch (err) {
-      console.error("Favori güncellenirken hata oluştu:", err);
+  try {
+    const url = `${API_BASE_URL}/favorites/${id}`;
+    const headers = { Authorization: `Bearer ${token}` };
+    const payload = { type: "tv" };
+
+    if (isFavorite) {
+      await axios.delete(url, {
+        headers,
+        data: payload, // 'params' yerine 'data' kullanıyoruz
+      });
+      setIsFavorite(false);
+    } else {
+      await axios.post(url, payload, { headers });
+      setIsFavorite(true);
     }
-  };
+  } catch (err) {
+    console.error("Favori güncellenirken hata oluştu:", err);
+  }
+};
+
 
   const toggleWishlist = async () => {
     if (!token) {
