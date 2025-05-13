@@ -16,7 +16,9 @@ function HomePage() {
 const [noResults, setNoResults] = useState(null); // false değil, null
 const [suggestedMovies, setSuggestedMovies] = useState([]);
 const [loadingSuggestions, setLoadingSuggestions] = useState(true);
-
+const [suggestionsLoading, setSuggestionsLoading] = useState(true);
+const [suggestionsError, setSuggestionsError] = useState(false);
+const suggestionRef = useRef(null);
 
 
 
@@ -164,20 +166,31 @@ useEffect(() => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(`${baseURL}/api/tmdb/suggestions`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
-      setSuggestedMovies(response.data);
+
+      setSuggestedMovies(response.data || []);
     } catch (error) {
-      console.error('Önerilen filmler alınamadı:', error.message);
+      console.error('Önerilen filmler alınamadı:', error);
+      setSuggestionsError(true);
     } finally {
-      setLoadingSuggestions(false);
+      setSuggestionsLoading(false);
     }
   };
 
   fetchSuggestions();
 }, []);
 
-  
+  const scrollSuggestions = (direction) => {
+  if (suggestionRef.current) {
+    const scrollAmount = direction === 'left' ? -300 : 300;
+    suggestionRef.current.scrollBy({
+      left: scrollAmount,
+      behavior: 'smooth'
+    });
+  }
+};
+
 
  return (
   <div className="home-page">
@@ -239,41 +252,43 @@ useEffect(() => {
         </div>
 
       
-{/* Önerilen Filmler Alanı */}
-<div className="suggested-section">
-  <h3 className="section-title">Senin İçin Önerilen Filmler</h3>
-  {loadingSuggestions ? (
+<div className="suggestions-section">
+  <h3 className="section-title">Önerilen Filmler</h3>
+
+  {suggestionsLoading ? (
     <p>Yükleniyor...</p>
   ) : suggestedMovies.length > 0 ? (
-    <div className="results-grid">
-      {suggestedMovies.map((movie) => (
-        <div
-          className="result-item"
-          key={movie.id}
-          onClick={() => openMovieDetails(movie)}
-        >
-          <img
-            src={
-              movie.poster_path
-                ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-                : '../videos/no-poster.jpg'
-            }
-            alt={movie.title}
-            onError={(e) => {
-              e.target.src = '../videos/no-poster.jpg';
-            }}
-          />
-          <p>{movie.title}</p>
-          <span className="media-type">Film</span>
-          <span className="rating">{movie.vote_average?.toFixed(1)}</span>
-        </div>
-      ))}
+    <div className="suggestion-carousel-wrapper">
+      <button className="scroll-btn left" onClick={() => scrollSuggestions('left')}>&lt;</button>
+
+      <div className="suggestion-carousel" ref={suggestionRef}>
+        {suggestedMovies.map((movie) => (
+          <div
+            className="suggestion-item"
+            key={movie.id}
+            onClick={() => openMovieDetails(movie)}
+          >
+            <img
+              src={
+                movie.poster_path
+                  ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                  : '/videos/no-poster.jpg'
+              }
+              alt={movie.title || movie.name}
+              onError={(e) => (e.target.src = '/videos/no-poster.jpg')}
+            />
+            <p>{movie.title || movie.name}</p>
+            
+          </div>
+        ))}
+      </div>
+
+      <button className="scroll-btn right" onClick={() => scrollSuggestions('right')}>&gt;</button>
     </div>
   ) : (
-    <p className="no-results-message">Lütfen beğendiğiniz filmleri favorileyin.</p>
+    <p className="no-suggestions">Lütfen beğendiğiniz filmleri favorileyin.</p>
   )}
 </div>
-
 
         {/* Arama bölümü */}
         <div className="search-container">

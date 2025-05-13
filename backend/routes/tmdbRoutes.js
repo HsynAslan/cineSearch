@@ -464,17 +464,20 @@ router.get('/suggestions', auth, async (req, res) => {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) return res.status(401).json({ message: 'Unauthorized' });
 
-    // Kullanıcıyı DB'den bul (JWT doğrulaması yoksa, bu kısmı JWT middleware ile koruman gerekir)
-    const user = await User.findOne({}); // Örnek: token'dan decode ederek user id al
+    // Kullanıcıyı DB'den bul (JWT doğrulaması yoksa, bunu JWT middleware ile koruman gerekir)
+    const user = await User.findOne({}); // Not: Bunu JWT ile userId alacak şekilde güncellemelisin
 
     if (!user || !user.movieSuggestions || user.movieSuggestions.length === 0) {
       return res.json([]);
     }
 
-    // movieSuggestions içinden id’leri al
-    const movieIds = user.movieSuggestions.map((item) => item.id);
+    // En son eklenen 15 öneriyi al (varsayım: son eklenen sona ekleniyor)
+    const latestSuggestions = user.movieSuggestions
+      .slice(-15) // son 15 taneyi al
+      .reverse(); // en yeniyi en başa koy
 
-    // TMDB'den filmleri çek
+    const movieIds = latestSuggestions.map((item) => item.id);
+
     const moviePromises = movieIds.map((id) =>
       axios.get(`https://api.themoviedb.org/3/movie/${id}?api_key=${apiKey}&language=tr-TR`)
     );
@@ -487,6 +490,7 @@ router.get('/suggestions', auth, async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 });
+
 
 
 module.exports = router;
