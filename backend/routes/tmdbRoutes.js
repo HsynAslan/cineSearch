@@ -461,20 +461,16 @@ router.get('/suggestions/movies', auth, async (req, res) => {
 
 router.get('/suggestions', auth, async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) return res.status(401).json({ message: 'Unauthorized' });
-
-    // Kullanıcıyı DB'den bul (JWT doğrulaması yoksa, bunu JWT middleware ile koruman gerekir)
-    const user = await User.findOne({}); // Not: Bunu JWT ile userId alacak şekilde güncellemelisin
+    const user = req.user;
 
     if (!user || !user.movieSuggestions || user.movieSuggestions.length === 0) {
       return res.json([]);
     }
 
-    // En son eklenen 15 öneriyi al (varsayım: son eklenen sona ekleniyor)
+    // Son 15 öneriyi ters sırayla al
     const latestSuggestions = user.movieSuggestions
-      .slice(-15) // son 15 taneyi al
-      .reverse(); // en yeniyi en başa koy
+      .slice(-15)
+      .reverse();
 
     const movieIds = latestSuggestions.map((item) => item.id);
 
@@ -490,6 +486,7 @@ router.get('/suggestions', auth, async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 });
+
 
 
 
