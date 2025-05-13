@@ -278,7 +278,7 @@ router.get("/check-lists/movie/:id", auth, async (req, res) => {
     console.log("Kullanıcı ID:", user.id);
 
     const isFavorite = user.favorites?.some(item => item.id === id && item.type === 'movie');
-    const isInWishlist = user.wishlist?.some(item => item.id === id && item.type === 'tv');
+    const isInWishlist = user.wishlist?.some(item => item.id === id && item.type === 'movie');
 
     console.log("Favori mi?", isFavorite);
     console.log("İstek listesinde mi?", isInWishlist);
@@ -537,6 +537,19 @@ router.get('/suggestionsTvGet', auth, async (req, res) => {
   }
 });
 
+
+router.get('/wishlistGet', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('wishlist');
+    if (!user) {
+      return res.status(404).json({ msg: 'Kullanıcı bulunamadı' });
+    }
+    res.json(user);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
 
 
 module.exports = router;

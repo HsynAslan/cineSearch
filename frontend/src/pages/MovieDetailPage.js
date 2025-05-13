@@ -133,7 +133,7 @@ const toggleWishlistStatus = async () => {
   try {
     const url = `${API_BASE_URL}/wishlist/${id}`;
     const headers = { Authorization: `Bearer ${token}` };
-    const payload = { type: "tv" };
+    const payload = { type: "movie" };
 
     if (isInWishlist) {
       await axios.delete(url, { headers, data: payload });

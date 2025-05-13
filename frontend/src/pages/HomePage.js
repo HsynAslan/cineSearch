@@ -24,7 +24,10 @@ const [suggestedTVShows, setSuggestedTVShows] = useState([]);
 const [tvSuggestionsLoading, setTvSuggestionsLoading] = useState(true);
 const [tvSuggestionsError, setTvSuggestionsError] = useState(false);
 const tvSuggestionRef = useRef(null);
-
+  const [wishlist, setWishlist] = useState([]);
+  const [wishlistLoading, setWishlistLoading] = useState(true);
+  const [wishlistError, setWishlistError] = useState(false);
+  const wishlistRef = useRef(null);
 
   // Kullanıcı oturum kontrolü
   useEffect(() => {
@@ -223,6 +226,61 @@ const scrollTvSuggestions = (direction) => {
     });
   }
 };
+ useEffect(() => {
+    const fetchWishlist = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${baseURL}/api/tmdb/wishlistGet`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
+        // Wishlist öğelerinin detaylarını al
+        const wishlistItems = await Promise.all(
+          response.data.wishlist.map(async (item) => {
+            try {
+              const detailResponse = await axios.get(
+                `${baseURL}/api/tmdb/${item.type}/${item.id}`
+              );
+              return {
+                ...detailResponse.data,
+                media_type: item.type // Tür bilgisini ekliyoruz
+              };
+            } catch (error) {
+              console.error(`Error fetching ${item.type} details:`, error);
+              return null;
+            }
+          })
+        );
+        
+        setWishlist(wishlistItems.filter(item => item !== null));
+      } catch (error) {
+        console.error('Wishlist alınamadı:', error);
+        setWishlistError(true);
+      } finally {
+        setWishlistLoading(false);
+      }
+    };
+
+    fetchWishlist();
+  }, []);
+
+  // Wishlist carousel kaydırma fonksiyonu
+  const scrollWishlist = (direction) => {
+    if (wishlistRef.current) {
+      const scrollAmount = direction === 'left' ? -300 : 300;
+      wishlistRef.current.scrollBy({
+        left: scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  // ... önceki fonksiyonlar aynı kalacak ...
+
+  // Wishlist öğesine tıklandığında
+  const openWishlistItem = (item) => {
+    navigate(`/${item.media_type}/${item.id}`);
+  };
 
 
  return (
@@ -283,6 +341,53 @@ const scrollTvSuggestions = (direction) => {
             </button>
           </div>
         </div>
+
+
+
+{/* Wishlist bölümü */}
+      <div className="suggestions-section">
+        <h3 className="section-title">Wishlist'im</h3>
+
+        {wishlistLoading ? (
+          <p>Yükleniyor...</p>
+        ) : wishlistError ? (
+          <p className="no-suggestions">Wishlist yüklenirken bir hata oluştu.</p>
+        ) : wishlist.length > 0 ? (
+          <div className="suggestion-carousel-wrapper">
+            <button className="scroll-btn left" onClick={() => scrollWishlist('left')}>&lt;</button>
+
+            <div className="suggestion-carousel" ref={wishlistRef}>
+              {wishlist.map((item) => (
+                <div
+                  className="suggestion-item"
+                  key={`${item.media_type}-${item.id}`}
+                  onClick={() => openWishlistItem(item)}
+                >
+                  <img
+                    src={
+                      item.poster_path
+                        ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
+                        : '/videos/no-poster.jpg'
+                    }
+                    alt={item.title || item.name}
+                    onError={(e) => (e.target.src = '/videos/no-poster.jpg')}
+                  />
+                  <p>{item.title || item.name}</p>
+                  <span className="media-type">
+                    {item.media_type === 'movie' ? 'Film' : 'Dizi'}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <button className="scroll-btn right" onClick={() => scrollWishlist('right')}>&gt;</button>
+          </div>
+        ) : (
+          <p className="no-suggestions">Wishlist'iniz boş. Film veya dizi eklemek için detay sayfalarını ziyaret edin.</p>
+        )}
+      </div>
+
+
 
       
 <div className="suggestions-section">
