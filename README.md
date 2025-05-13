@@ -18,6 +18,7 @@ Bu proje iki ana parçadan oluşur:
 
 🧭 Navigasyon
 
+```
 cineSearch/
 ├── backend/       # Express.js tabanlı API
 │   ├── routes/
@@ -31,6 +32,8 @@ cineSearch/
 │   │   ├── css/
 │   │   └── ...
 └── README.md
+```
+
 
 🌟 Özellikler
 
