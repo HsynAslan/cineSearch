@@ -5,6 +5,7 @@ import '../css/MovieDetailPage.css';
 
 const API_BASE_URL = 'http://localhost:5000/api/tmdb';
 
+
 const MovieDetailPage = () => {
   const { id, type } = useParams();
   const [movie, setMovie] = useState(null);
@@ -106,9 +107,11 @@ const toggleFavoriteStatus = async () => {
       setIsFavorite(false);
       console.log("Favoriden çıkarıldı.");
     } else {
+
       await axios.post(url, payload, { headers });
       setIsFavorite(true);
       console.log("Favoriye eklendi.");
+    
     }
   } catch (err) {
     console.error("Favori güncelleme hatası:", err.response?.data?.message || err.message);

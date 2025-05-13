@@ -189,6 +189,8 @@ router.post('/movie/like', async (req, res) => {
 
 
 
+const updateMovieSuggestions = require("../utils/updateMovieSuggestions"); // üstte tanımlı olmalı
+
 // ✅ Favori Ekle
 router.post("/favorites/:id", auth, async (req, res) => {
   const { id } = req.params;
@@ -206,8 +208,20 @@ router.post("/favorites/:id", auth, async (req, res) => {
 
   user.favorites.push({ id, type });
   await user.save();
+
+  // 🎯 Sadece filmse önerileri güncelle
+  if (type === "movie") {
+    try {
+      await updateMovieSuggestions(user._id.toString(), id);
+    } catch (err) {
+      console.error("Öneriler güncellenirken hata:", err.message);
+      // isteğe bağlı: hata olsa da favori kaydedildiği için 200 dönebiliriz
+    }
+  }
+
   res.json({ message: "Favorilere eklendi." });
 });
+
 
 // ❌ Favoriden Kaldır
 router.delete("/favorites/:id", auth, async (req, res) => {
@@ -377,6 +391,102 @@ router.get('/movie/:id', async (req, res) => {
   }
 });
 
+// Kullanıcının beğendiği filmlere benzer öneriler
+// router.get('/similar-based-on-favorites', auth, async (req, res) => {
+//   const user = req.user;
+
+//   try {
+//     // Kullanıcı modelinden beğendiği filmler alınır
+//     const User = require('../models/User');
+//     const foundUser = await User.findById(user.id);
+
+//     if (!foundUser || !foundUser.favorites) {
+//       return res.json([]);
+//     }
+
+//     // Sadece film olanları filtrele (dizi hariç)
+//     const favoriteMovies = foundUser.favorites.filter(fav => fav.type === 'movie');
+
+//     const uniqueSimilar = new Map();
+
+//     // Her film için benzer filmleri çek
+//     for (const fav of favoriteMovies.slice(0, 3)) {
+//       const tmdbRes = await axios.get(`https://api.themoviedb.org/3/movie/${fav.id}/similar`, {
+//         params: {
+//           api_key: process.env.TMDB_API_KEY,
+//           language: 'tr-TR'
+//         }
+//       });
+
+//       tmdbRes.data.results.forEach(movie => {
+//         if (!uniqueSimilar.has(movie.id)) {
+//           uniqueSimilar.set(movie.id, movie);
+//         }
+//       });
+//     }
+
+//     res.json(Array.from(uniqueSimilar.values()).slice(0, 10));
+//   } catch (err) {
+//     console.error('Benzer filmler alınamadı:', err.message);
+//     res.status(500).json({ message: 'Benzer filmler alınamadı.' });
+//   }
+// });
+
+router.get('/suggestions/movies', auth, async (req, res) => {
+  const user = await User.findById(req.user.id);
+  if (!user || !user.movieSuggestions) {
+    return res.json([]);
+  }
+
+  try {
+    const tmdbIds = user.movieSuggestions.map(s => s.id).slice(0, 10); // ilk 10 öneri
+    const movieDetails = [];
+
+    for (const id of tmdbIds) {
+      const response = await axios.get(`https://api.themoviedb.org/3/movie/${id}`, {
+        params: {
+          api_key: process.env.TMDB_API_KEY,
+          language: 'tr-TR'
+        }
+      });
+      movieDetails.push(response.data);
+    }
+
+    res.json(movieDetails);
+  } catch (err) {
+    console.error("Öneriler alınırken hata:", err.message);
+    res.status(500).json({ message: "Öneriler alınamadı." });
+  }
+});
+
+router.get('/suggestions', auth, async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ message: 'Unauthorized' });
+
+    // Kullanıcıyı DB'den bul (JWT doğrulaması yoksa, bu kısmı JWT middleware ile koruman gerekir)
+    const user = await User.findOne({}); // Örnek: token'dan decode ederek user id al
+
+    if (!user || !user.movieSuggestions || user.movieSuggestions.length === 0) {
+      return res.json([]);
+    }
+
+    // movieSuggestions içinden id’leri al
+    const movieIds = user.movieSuggestions.map((item) => item.id);
+
+    // TMDB'den filmleri çek
+    const moviePromises = movieIds.map((id) =>
+      axios.get(`https://api.themoviedb.org/3/movie/${id}?api_key=${apiKey}&language=tr-TR`)
+    );
+    const movieResponses = await Promise.all(moviePromises);
+    const suggestedMovies = movieResponses.map((response) => response.data);
+
+    res.json(suggestedMovies);
+  } catch (error) {
+    console.error('Error fetching suggested movies:', error.message);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
 
 
 module.exports = router;

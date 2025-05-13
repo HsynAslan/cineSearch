@@ -464,3 +464,18 @@ p {
   text-align: center;
   margin-top: 20px;
 }
+
+.suggested-section {
+  margin-top: 30px;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.no-results-message {
+  font-style: italic;
+  color: #ccc;
+  margin-top: 10px;
+}

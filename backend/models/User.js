@@ -27,6 +27,14 @@ likes: [
     type: { type: String, enum: ["movie", "tv"], required: true },
   },
 ],
+movieSuggestions: [
+  {
+    id: { type: String, required: true },
+    addedAt: { type: Date, default: Date.now }
+  }
+],
+
+
 
 }, { timestamps: true });
 
